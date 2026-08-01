@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Torn Build Planner
 // @namespace    https://github.com/mat-mcc-uk
-// @version      1.0.2
+// @version      1.0.3
 // @description  Build planner on the Torn gym page — shows what to train next for your chosen build
 // @author       mat-mcc-uk
 // @match        https://www.torn.com/gym.php*
@@ -144,92 +144,129 @@
   // CSS
   // ---------------------------------------------------------------
   GM_addStyle(`
-    #tbp { position:fixed; bottom:50px; left:10px; width:310px; max-height:82vh;
-      overflow-y:auto; background:#1b1b1b; color:#e0e0e0; border:1px solid #444;
-      border-radius:6px; font-family:Arial,sans-serif; font-size:12px;
-      z-index:9998; box-shadow:0 2px 10px rgba(0,0,0,.5); }
+    #tbp { display:block; width:100%; margin-top:6px;
+      background:#111; color:#e0e0e0; border:1px solid #3a5010;
+      font-family:Arial,sans-serif; font-size:12px; }
     #tbp.col .tbp-bd { display:none; }
-    #tbp h3 { margin:0; padding:8px 10px; background:#2a2a2a; border-bottom:1px solid #444;
-      cursor:pointer; user-select:none; display:flex; justify-content:space-between;
-      align-items:center; font-size:12px; }
-    .tbp-bd { padding:8px 10px; }
+    #tbp h3 { margin:0; padding:8px 12px;
+      background:linear-gradient(to bottom, #5a8a24, #3d6016);
+      border-bottom:1px solid #2a4a0a; color:#e8f5d0;
+      cursor:pointer; user-select:none;
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:13px; font-weight:bold; }
+    .tbp-bd { padding:10px 12px; }
     .tbp-builds { display:flex; gap:4px; margin-bottom:6px; }
     .tbp-bb { flex:1; padding:5px 3px; font-size:10px; text-align:center;
-      background:#2a2a2a; color:#666; border:1px solid #333;
-      border-radius:4px; cursor:pointer; line-height:1.3; }
-    .tbp-bb.on { background:#1e3a2a; color:#9fe8b0; border-color:#2d7d47; }
-    .tbp-desc { font-size:10px; color:#555; margin-bottom:6px; }
-    .tbp-dist { display:flex; height:7px; border-radius:4px; overflow:hidden; margin-bottom:8px; }
-    .tbp-focus { background:#1e3a2a; border:1px solid #2d7d47;
-      border-radius:4px; padding:7px 10px; margin-bottom:10px; }
-    .tbp-fl { font-size:10px; color:#888; margin-bottom:2px; }
+      background:#1a2a0a; color:#778; border:1px solid #2a3a10;
+      cursor:pointer; line-height:1.3; }
+    .tbp-bb.on { background:#2a4a12; color:#b8e878; border-color:#5a8a24; }
+    .tbp-desc { font-size:10px; color:#556; margin-bottom:6px; }
+    .tbp-dist { display:flex; height:7px; overflow:hidden; margin-bottom:8px; border:1px solid #2a3a10; }
+    .tbp-focus { background:#1a2e0a; border:1px solid #4a7a18;
+      padding:7px 10px; margin-bottom:10px; }
+    .tbp-fl { font-size:10px; color:#778; margin-bottom:2px; }
     .tbp-fs { font-size:18px; font-weight:bold; line-height:1.2; }
-    .tbp-fsub { font-size:10px; color:#888; margin-top:2px; }
+    .tbp-fsub { font-size:10px; color:#778; margin-top:2px; }
     .tbp-stat { margin-bottom:8px; }
     .tbp-sh { display:flex; justify-content:space-between; font-size:11px; margin-bottom:3px; }
     .tbp-sn { font-weight:bold; }
-    .tbp-sp { color:#666; }
-    .tbp-bw { background:#2a2a2a; border-radius:3px; height:7px; overflow:hidden; }
-    .tbp-b  { height:100%; border-radius:3px; transition:width .4s; }
+    .tbp-sp { color:#668; }
+    .tbp-bw { background:#1a2a0a; height:7px; overflow:hidden; border:1px solid #2a3a10; }
+    .tbp-b  { height:100%; transition:width .4s; }
     .tbp-sg { font-size:10px; margin-top:2px; }
-    .tbp-sec { font-size:10px; font-weight:bold; color:#555; text-transform:uppercase;
-      letter-spacing:.5px; border-top:1px solid #2a2a2a; padding-top:7px; margin:8px 0 5px; }
+    .tbp-sec { font-size:10px; font-weight:bold; color:#4a6a20;
+      text-transform:uppercase; letter-spacing:.5px;
+      border-top:1px solid #2a3a10; padding-top:7px; margin:8px 0 5px; }
     .tbp-m { display:flex; justify-content:space-between; font-size:10px;
-      color:#555; margin-bottom:3px; }
-    .tbp-m.done { color:#9fe8b0; }
-    .tbp-mv { color:#444; }
-    .tbp-m.done .tbp-mv { color:#2d7d47; }
-    .tbp-foot { font-size:10px; color:#444; margin-top:6px; }
+      color:#556; margin-bottom:3px; }
+    .tbp-m.done { color:#90c840; }
+    .tbp-mv { color:#3a4a18; }
+    .tbp-m.done .tbp-mv { color:#5a8a24; }
+    .tbp-foot { font-size:10px; color:#3a4a18; margin-top:6px; }
     .tbp-key label { display:block; color:#aaa; margin-bottom:3px; font-size:11px; }
-    .tbp-key input { width:100%; box-sizing:border-box; background:#2a2a2a; color:#e0e0e0;
-      border:1px solid #555; border-radius:3px; padding:4px 6px;
-      font-size:11px; margin-bottom:6px; }
-    .tbp-btn { background:#2a2a2a; color:#e0e0e0; border:1px solid #555;
-      border-radius:3px; padding:3px 8px; cursor:pointer; font-size:11px; }
-    .tbp-btn:hover { background:#333; }
-    .tbp-btn.g { background:#1e5631; color:#9fe8b0; border-color:#2d7d47; }
-    .tbp-ic { background:none; border:none; color:#e0e0e0; cursor:pointer; font-size:13px; padding:0 2px; }
+    .tbp-key input { width:100%; box-sizing:border-box; background:#1a2a0a; color:#e0e0e0;
+      border:1px solid #3a5a10; padding:4px 6px; font-size:11px; margin-bottom:6px; }
+    .tbp-btn { background:#1a2a0a; color:#b8e878; border:1px solid #3a5a10;
+      padding:3px 8px; cursor:pointer; font-size:11px; }
+    .tbp-btn:hover { background:#2a4a12; }
+    .tbp-btn.g { background:#2a4a12; color:#c8f888; border-color:#5a8a24; }
+    .tbp-ic { background:none; border:none; color:#c8e8a0; cursor:pointer; font-size:14px; padding:0 2px; }
   `);
 
   // ---------------------------------------------------------------
   // Panel
   // ---------------------------------------------------------------
+  function findAnchor() {
+    // Try increasingly broad selectors for the Specialist Gyms section.
+    // Fall back to the gym's main content wrapper, then body.
+    const candidates = [
+      '[class*="specialistGyms"]',
+      '[class*="specialist-gyms"]',
+      '[class*="specialist_gyms"]',
+      '[class*="specialistGym"]',
+    ];
+    for (const sel of candidates) {
+      const el = document.querySelector(sel);
+      if (el) return el;
+    }
+    // Text-based fallback: find any element whose direct text includes
+    // "Specialist Gyms" and grab its parent container
+    const all = document.querySelectorAll('div, section');
+    for (const el of all) {
+      if (el.children.length === 0 && /specialist gyms/i.test(el.textContent)) {
+        return el.parentElement || el;
+      }
+      if (/specialist gyms/i.test(el.firstChild?.textContent || '')) {
+        return el;
+      }
+    }
+    // Broader fallback: end of the gym main content
+    return document.querySelector('[class*="gymContent"], [class*="gym-content"], #gym-root, .gym-wrap')
+      || null;
+  }
+
   function buildPanel() {
     if (document.getElementById('tbp')) return;
 
     const p = document.createElement('div');
     p.id = 'tbp';
-    p.classList.add('col');
     p.innerHTML = `
       <h3>
         <span>📊 Build Planner</span>
-        <span style="display:flex;gap:4px;align-items:center">
+        <span style="display:flex;gap:6px;align-items:center">
           <button class="tbp-ic" id="tbp-ref" title="Refresh stats">↻</button>
-          <button class="tbp-ic" id="tbp-tog">▲</button>
+          <button class="tbp-ic" id="tbp-tog">▼</button>
         </span>
       </h3>
       <div class="tbp-bd"><div id="tbp-c">Loading…</div></div>
     `;
-    document.body.appendChild(p);
+
+    // Inject after Specialist Gyms section
+    const anchor = findAnchor();
+    if (anchor) {
+      anchor.after(p);
+    } else {
+      // No anchor found — fall back to appending to body (original behaviour)
+      p.style.cssText = 'position:fixed;bottom:50px;left:10px;width:310px;z-index:9998';
+      document.body.appendChild(p);
+    }
+
     dom.panel = p;
     dom.c     = document.getElementById('tbp-c');
 
     const tog = document.getElementById('tbp-tog');
     function toggle() {
       p.classList.toggle('col');
-      tog.textContent = p.classList.contains('col') ? '▲' : '▼';
+      tog.textContent = p.classList.contains('col') ? '▶' : '▼';
       if (!p.classList.contains('col')) render();
     }
     p.querySelector('h3').addEventListener('click', (e) => {
       if (e.target.closest('button')) return;
       toggle();
     });
-    tog.addEventListener('pointerdown', (e) => e.stopPropagation());
     tog.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
 
-    const ref = document.getElementById('tbp-ref');
-    ref.addEventListener('pointerdown', (e) => e.stopPropagation());
-    ref.addEventListener('click', async (e) => {
+    document.getElementById('tbp-ref').addEventListener('click', async (e) => {
       e.stopPropagation();
       await loadStats(true);
       render();
