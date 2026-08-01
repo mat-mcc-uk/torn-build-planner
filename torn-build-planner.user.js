@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Torn Build Planner
 // @namespace    https://github.com/mat-mcc-uk
-// @version      1.0.1
+// @version      1.0.2
 // @description  Build planner on the Torn gym page — shows what to train next for your chosen build
 // @author       mat-mcc-uk
 // @match        https://www.torn.com/gym.php*
@@ -30,7 +30,7 @@
   const STAT_COLOUR = { str: '#e74c3c', spd: '#3498db', def: '#2ecc71', dex: '#f39c12' };
   const STAT_LABEL  = { str: 'STR',    spd: 'SPD',    def: 'DEF',    dex: 'DEX' };
   const STAT_KEYS   = ['str', 'spd', 'def', 'dex'];
-  const MILESTONES  = [5e6, 10e6, 25e6, 50e6, 100e6, 250e6, 500e6, 1e9, 2.5e9, 5e9, 10e9];
+  const MILESTONES  = [50e3, 100e3, 250e3, 500e3, 1e6, 5e6, 10e6, 25e6, 50e6, 100e6, 250e6, 500e6, 1e9, 2.5e9, 5e9, 10e9];
   const STATS_TTL   = 5 * 60 * 1000;
   const TRAIN_GUARD = 30 * 1000;
 
