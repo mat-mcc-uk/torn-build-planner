@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Torn Build Planner
 // @namespace    https://github.com/mat-mcc-uk
-// @version      1.0.0
+// @version      1.0.1
 // @description  Build planner on the Torn gym page — shows what to train next for your chosen build
 // @author       mat-mcc-uk
 // @match        https://www.torn.com/gym.php*
@@ -30,7 +30,7 @@
   const STAT_COLOUR = { str: '#e74c3c', spd: '#3498db', def: '#2ecc71', dex: '#f39c12' };
   const STAT_LABEL  = { str: 'STR',    spd: 'SPD',    def: 'DEF',    dex: 'DEX' };
   const STAT_KEYS   = ['str', 'spd', 'def', 'dex'];
-  const MILESTONES  = [100e6, 250e6, 500e6, 1e9, 2.5e9, 5e9, 10e9];
+  const MILESTONES  = [5e6, 10e6, 25e6, 50e6, 100e6, 250e6, 500e6, 1e9, 2.5e9, 5e9, 10e9];
   const STATS_TTL   = 5 * 60 * 1000;
   const TRAIN_GUARD = 30 * 1000;
 
@@ -346,8 +346,12 @@
         </div>`;
     }).join('');
 
-    // Milestones
-    const miles = MILESTONES.map(m => {
+    // Milestones — show the last completed milestone as context, then the next 4 upcoming.
+    // This keeps the table relevant whether you're at 8M or 800M total.
+    const lastDoneIdx = MILESTONES.reduce((idx, m, i) => currentTotal >= m ? i : idx, -1);
+    const windowStart = Math.max(0, lastDoneIdx);       // one done for context
+    const windowEnd   = Math.min(MILESTONES.length, windowStart + 5);
+    const miles = MILESTONES.slice(windowStart, windowEnd).map(m => {
       const done = currentTotal >= m;
       const vals = STAT_KEYS.filter(k => build[k] > 0)
         .map(k => `${STAT_LABEL[k]} ${fmt(m * build[k])}`).join(' · ');
